@@ -31,8 +31,8 @@ class WebView:
         """
         self.config  = config
         self.html_updater = html_updater
-    
-    def configure(self, title="Webview App", host: str="127.0.0.1", port: int=8080, debug: bool=True):
+
+    def configure(self, title="Webview App", host: str="127.0.0.1", port: int=8080, debug: bool=True, log_level: str="warning"):
         """
         Configure the WebView settings.
 
@@ -41,11 +41,12 @@ class WebView:
             host (str, optional): The host address for the server. Defaults to "127.0.0.1".
             port (int, optional): The port number for the server. Defaults to 8080.
             debug (bool, optional): Whether to enable debug mode. Defaults to True.
-
+            log_level (str, optional): The logging verbosity for the fastapi server.
+            
         Example:
             >>> Webview.configure(title="webview app", host="0.0.0.0", port=3000, debug=False)
         """
-        self.config.set(title, host, port, debug)
+        self.config.set(title, host, port, debug, log_level)
     
     def update_view(self, html: str):
         """
@@ -96,8 +97,7 @@ class WebView:
             print("Webview: Starting the webview server...")
         start_app()
         time.sleep(2)
-        if self.config.debug:
-            print(f"Webview: Webview server started, you can view it at http://{self.config.host}:{self.config.port}/")
+        print(f"Webview: Webview server started, you can view it at http://{self.config.host}:{self.config.port}/")
         return True
 
 

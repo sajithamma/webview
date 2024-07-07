@@ -2,6 +2,7 @@ import time
 from webview import Webview
 
 Webview.start_webview()
+Webview.configure(log_level="critical")
 
 i=0
 while True:

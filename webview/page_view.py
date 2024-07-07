@@ -1,6 +1,6 @@
 import asyncio
 from .config import Config
-from fastapi import WebSocket
+from fastapi import WebSocket, WebSocketDisconnect
 
 
 class HTMLUpdater:
@@ -26,7 +26,7 @@ class HTMLUpdater:
         self.config = None
         self.change_detected = True
         self.client: WebSocket = None
-        self.html_content = "<h1>Welcome to the Custom WebView!</h1>"
+        self.html_content = ""
         
     def bind_config(self, config: Config):
         """
@@ -40,7 +40,7 @@ class HTMLUpdater:
             >>> config.set(debug=True)
             >>> webview.bind_config(config)
         """
-        self.config=config
+        self.config=config 
 
     def update_view(self, new_html: str):
         """

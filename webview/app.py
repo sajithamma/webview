@@ -60,13 +60,16 @@ async def websocket_endpoint(websocket: WebSocket):
     Args:
         websocket (WebSocket): The WebSocket connection object.
     """
-    await html_updater.connect_view(websocket)
+    try:
+        await html_updater.connect_view(websocket)
+    except Exception as e:
+        print(f"Client browser disconnected: {str(e)}")
 
 def run_app():
     """
     Run the FastAPI application using uvicorn
     """
-    uvicorn.run(app, host=config.host, port=config.port)
+    uvicorn.run(app, host=config.host, port=config.port, log_level=config.log_level)
 
 def start_app():
     """
