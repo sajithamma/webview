@@ -32,19 +32,20 @@ class WebView:
         self.config  = config
         self.html_updater = html_updater
     
-    def configure(self, host: str="127.0.0.1", port: int=8080, debug: bool=True):
+    def configure(self, title="Webview App", host: str="127.0.0.1", port: int=8080, debug: bool=True):
         """
         Configure the WebView settings.
 
         Args:
+            title (str): The title to be shown on the browser tab.
             host (str, optional): The host address for the server. Defaults to "127.0.0.1".
             port (int, optional): The port number for the server. Defaults to 8080.
             debug (bool, optional): Whether to enable debug mode. Defaults to True.
 
         Example:
-            >>> Webview.configure(host="0.0.0.0", port=3000, debug=False)
+            >>> Webview.configure(title="webview app", host="0.0.0.0", port=3000, debug=False)
         """
-        self.config.set(host, port, debug)
+        self.config.set(title, host, port, debug)
     
     def update_view(self, html: str):
         """
@@ -91,10 +92,12 @@ class WebView:
             >>> success = Webview.start_webview()
             >>> print("WebView started successfully" if success else "Failed to start WebView")
         """
+        if self.config.debug:
+            print("Webview: Starting the webview server...")
         start_app()
         time.sleep(2)
         if self.config.debug:
-            print("Webview: Starting the webview server.")
+            print(f"Webview: Webview server started, you can view it at http://{self.config.host}:{self.config.port}/")
         return True
 
 

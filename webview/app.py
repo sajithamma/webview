@@ -1,26 +1,56 @@
 import uvicorn
+import browsers as br
 from .config import config
 from threading import Thread
 from .page_view import html_updater
+from contextlib import asynccontextmanager
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from fastapi import FastAPI, WebSocket, Request
 
-app = FastAPI()
-templates = Jinja2Templates(directory="webview/templates")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    if browsers := list(br.browsers()):
+        br.launch(browsers[0].get("browser_type"), url=f"http://{config.host}:{config.port}/")
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     """
     Serve the main HTML page.
     
-    Args:
-        request (Request): The incoming request object.
-        
     Returns:
-        TemplateResponse: The rendered HTML template.
+        HTMLResponse: The rendered HTML template.
     """
-    return templates.TemplateResponse("index.html", {"request": request})
+    html = """<!DOCTYPE html>
+    <html>
+    <head>
+        <title>[=[title]=]</title>
+        <style>
+            html, body, #main_update_content {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="main_update_content"></div>
+        <script>
+            const socket = new WebSocket(`ws://[=[host]=]:[=[port]=]/ws`);
+            socket.onmessage = function(event) {
+                document.getElementById("main_update_content").innerHTML = event.data;
+            };
+        </script>
+    </body>
+    </html>"""
+    html = html.replace("[=[host]=]", config.host)
+    html = html.replace("[=[port]=]", str(config.port))
+    html = html.replace("[=[title]=]", config.title)
+    return HTMLResponse(html)
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -52,3 +82,4 @@ def start_app():
     """
     thread = Thread(target=run_app, daemon=True)
     thread.start()
+    
