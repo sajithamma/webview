@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "webview"
+version = "0.1.0"
+authors = [
+    "ASWANTH C Manoj <aswanthmanoj51@gmail.com>"
+]
+description = "A simple WebView package for python applications to inject html directly to browser"
+readme = "README.md"
+packages = [{include = "webview"}]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating system :: OS Independent"
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.111.0"
+uvicorn = "^0.30.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

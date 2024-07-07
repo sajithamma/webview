@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Custom WebView</title>
+    <style>
+        html, body, #main_update_content {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="main_update_content"></div>
+    <script>
+        const socket = new WebSocket(`ws://${location.host}/ws`);
+        socket.onmessage = function(event) {
+            document.getElementById("main_update_content").innerHTML = event.data;
+        };
+    </script>
+</body>
+</html>
