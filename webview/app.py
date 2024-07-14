@@ -44,6 +44,54 @@ async def root(request: Request):
             socket.onmessage = function(event) {
                 document.getElementById("main_update_content").innerHTML = event.data;
             };
+            
+            let mediaRecorder;
+            let audioChunks = [];
+            
+            async function startRecording() {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                    if (audioChunks.length > 0) {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const reader = new FileReader();
+                        reader.readAsDataURL(audioBlob);
+                        reader.onloadend = () => {
+                            const base64data = reader.result.split(',')[1];
+                            socket.send(JSON.stringify({ type: 'audio', data: base64data }));
+                        }
+                        audioChunks = [];
+                    }
+                };
+                mediaRecorder.start(100);
+            }
+            
+            function stopRecording() {
+                if (mediaRecorder) {
+                    mediaRecorder.stop();
+                }
+            }
+
+            function playAudio(audioData) {
+                const audio = new Audio(audioData);
+                audio.play();
+            }
+            
+            socket.onmessage = function(event) {
+                const message = JSON.parse(event.data);
+                if (message.type === 'html') {
+                    document.getElementById("main_update_content").innerHTML = message.data;
+                } else if (message.type === 'audio') {
+                    playAudio(message.data);
+                } else if (message.type === 'command') {
+                    if (message.data === 'start_listening') {
+                        startRecording();
+                    } else if (message.data === 'stop_listening') {
+                        stopRecording();
+                    }
+                }
+            };
         </script>
     </body>
     </html>"""
