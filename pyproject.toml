@@ -19,6 +19,7 @@ python = "^3.10"
 fastapi = "^0.111.0"
 uvicorn = "^0.30.1"
 pybrowsers = "^0.6.0"
+pyppeteer = "^1.0.0"
 
 
 [build-system]
