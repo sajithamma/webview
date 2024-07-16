@@ -1,7 +1,6 @@
-import time, io
-import asyncio, base64
+import asyncio
 from webview import webview
-from pydub import AudioSegment
+from webview.utils import read_and_encode_mp3
 
 async def updater():
     i=0
@@ -10,26 +9,20 @@ async def updater():
         await asyncio.sleep(1)
         i+=1
 
-def mp3_to_base64_wav(mp3_path):
-    audio = AudioSegment.from_mp3(mp3_path)
-    buffer = io.BytesIO()
-    audio.export(buffer, format="wav")
-    wav_data = buffer.getvalue()
-    base64_wav = base64.b64encode(wav_data).decode('utf-8')
-    return f"data:audio/wav;base64,{base64_wav}"
-
 async def main():
     webview.start_webview()
     webview.configure(log_level="critical")
     
     task = asyncio.create_task(updater())
     
-    audio_1 = mp3_to_base64_wav("sample_audio1.mp3")
+    # Plays a sample audio in the browser
+    audio_1 = read_and_encode_mp3("sample/sample_audio1.mp3")
     audio_id = await webview.async_play_audio(audio_1)
     print("Audio with id", audio_id, "is playing")
     
-    audio_2 = mp3_to_base64_wav("sample_audio2.mp3")
-    audio_id = await webview.async_play_audio(audio_2, delay=3) # Add an 5 second delay in audio playback 
+    # Plays a second sample audio after a 5 second delay
+    audio_2 = read_and_encode_mp3("sample/sample_audio2.mp3")
+    audio_id = await webview.async_play_audio(audio_2, delay=3) 
     print("Audio with id", audio_id, "is playing")
     
     await asyncio.sleep(120)

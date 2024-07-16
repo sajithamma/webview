@@ -35,7 +35,7 @@ class WebView:
         self.html_updater = html_updater
         self.audio_player = audio_player
 
-    def configure(self, title="Webview App", host: str="127.0.0.1", port: int=8080, debug: bool=True, log_level: str="warning", kiosk_mode=False, orientation="landscape", window_size=None):
+    def configure(self, title="Webview App", host: str="127.0.0.1", port: int=8080, debug: bool=True, log_level: str="warning"):
         """
         Configure the WebView settings.
 
@@ -46,14 +46,11 @@ class WebView:
             debug (bool, optional): Whether to enable debug mode.
             log_level (str, optional): The logging verbosity for the fastapi server.
             headless (bool, optional): Whether to run the browser in headless mode.
-            kiosk_mode (bool): Whether to start the browser in kiosk mode. Default to False.
-            orientation (str): Sets the orientation to either "landscape" or "portrait". Note that forcing orientation might not work on all systems and might require additional setup.
-            window_size (tuple): Sets a specific window size (width and height).
             
         Example:
             >>> WebView.configure(title="Webview App", host="0.0.0.0", port=3000, debug=False)
         """
-        self.config.set(title, host, port, debug, log_level, kiosk_mode, orientation, window_size)
+        self.config.set(title, host, port, debug, log_level)
     
     def update_view(self, html: str):
         """
@@ -167,7 +164,7 @@ class WebView:
         if self.config.debug:
             print("Webview: Starting the webview server...")
         start_app()
-        time.sleep(2)
+        time.sleep(1)
         print(f"Webview: Webview server started, you can view it at http://{self.config.host}:{self.config.port}/")
         return True
 

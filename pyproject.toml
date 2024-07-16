@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "webview"
-version = "0.1.0"
+version = "0.1.2"
 authors = [
     "ASWANTH C Manoj <aswanthmanoj51@gmail.com>"
 ]
@@ -16,10 +16,10 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
-fastapi = "^0.111.0"
-uvicorn = "^0.30.1"
 pybrowsers = "^0.6.0"
-pyppeteer = "^1.0.0"
+playwright = "^1.45.0"
+fastapi = "^0.111.1"
+uvicorn = "^0.30.1"
 
 
 [build-system]

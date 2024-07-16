@@ -2,22 +2,26 @@ import asyncio
 import browsers as br
 from .config import config
 from threading import Thread
-from pyppeteer import launch
 from contextlib import asynccontextmanager
 from fastapi.responses import HTMLResponse
 from fastapi import FastAPI, WebSocket, Request
+from playwright.async_api import async_playwright
 from .page_view import html_updater, audio_player
 from webview.scripts.html_updater import html_updater_script
 from webview.scripts.audio_player import audio_player_script
 
 
-page, browser = None, None
+page, browser, playwright = None, None, None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # if browsers := list(br.browsers()):
     #     br.launch(browsers[0].get("browser_type"), url=f"http://{config.host}:{config.port}/")
     yield
+    if browser:
+        await browser.close()
+    if playwright:
+        await playwright.stop()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -86,15 +90,26 @@ async def audio_playback_socket(websocket: WebSocket):
             print(f"Client browser disconnected from audio playback socket: {str(e)}")
 
 async def start_browser():
-    global browser, page
-    browser = await launch(
+    global browser, page, playwright
+    playwright = await async_playwright().start()
+    browser = await playwright.chromium.launch(
         headless=False, 
-        args=config.get_browser_args(),
-        ignoreDefaultArgs=['--enable-automation']
+        args=[
+            '--fullscreen',
+            '--no-first-run', 
+            '--start-maximized',
+            '--disable-infobars', 
+            '--no-default-browser-check',
+            '--autoplay-policy=no-user-gesture-required'
+        ],
+        ignore_default_args=['--enable-automation']
     )
-    page = await browser.pages()
-    page = page[0]
-    await page.setViewport({'width': 0, 'height': 0})
+    context = await browser.new_context(
+        viewport=None,
+        no_viewport=True,  
+        color_scheme='dark'
+    )
+    page = await context.new_page()
     await page.goto(f"http://{config.host}:{config.port}/")
     await page.evaluate('''document.body.style.overflow='hidden';''')
 
