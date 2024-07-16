@@ -1,5 +1,5 @@
 import io
-import base64
+import base64, asyncio
 from pydub import AudioSegment
 
 def read_and_encode_audio(file_path: str, input_format: str) -> str:
@@ -34,3 +34,11 @@ def read_and_encode_aac(file_path: str) -> str:
 def read_and_encode_m4a(file_path: str) -> str:
     """Reads an m4a audio from the given file path and encodes it into base64 wav"""
     return read_and_encode_audio(file_path, "m4a")
+
+def ensure_event_loop():
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+    return loop

@@ -2,6 +2,7 @@ import asyncio
 import browsers as br
 from .config import config
 from threading import Thread
+from .utils import ensure_event_loop
 from contextlib import asynccontextmanager
 from fastapi.responses import HTMLResponse
 from fastapi import FastAPI, WebSocket, Request
@@ -15,8 +16,6 @@ page, browser, playwright = None, None, None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # if browsers := list(br.browsers()):
-    #     br.launch(browsers[0].get("browser_type"), url=f"http://{config.host}:{config.port}/")
     yield
     if browser:
         await browser.close()
@@ -134,5 +133,6 @@ def start_app():
     """
     thread = Thread(target=run_app, daemon=True)
     thread.start()
-    asyncio.create_task(start_browser())
+    loop = ensure_event_loop()
+    loop.run_until_complete(start_browser())
     
