@@ -1,15 +1,18 @@
+import numpy as np
 import asyncio, json, uuid
 from .config import Config
 from .utils import ensure_event_loop
+from typing import Callable, Optional
 from fastapi import WebSocket, WebSocketDisconnect
+
 
 
 class HTMLUpdater:
     def __init__(self):
         self.config = None
+        self.html_content = ""
         self.change_detected = True
         self.client: WebSocket = None
-        self.html_content = ""
         
     def bind_config(self, config: Config):
         self.config=config 
@@ -45,7 +48,7 @@ class AudioPlayer:
         self.config = None
         self.client: WebSocket = None
         self.audio_queue = asyncio.Queue()
-        self.pending_audios = {}
+        self.pending_audios: dict[str, bool] = {}
         
     def bind_config(self, config: Config):
         self.config=config    
@@ -55,7 +58,7 @@ class AudioPlayer:
         return loop.run_until_complete(self.async_play_audio(audio_data, delay))   
          
     async def async_play_audio(self, audio_data: str, delay: float) -> str:
-        audio_id = str(uuid.uuid4())
+        audio_id: str = str(uuid.uuid4())
         if self.client:
             await self.audio_queue.put((audio_id, audio_data, delay))
             self.pending_audios[audio_id] = True
@@ -86,7 +89,67 @@ class AudioPlayer:
                     del self.pending_audios[data['id']]
         finally:
             self.client = None
+          
+          
+            
+class AudioRecorder:
+
+    def __init__(self) -> None:
+        self.is_recording: bool = False
+        self.config: Optional[Config] = None
+        self.client: Optional[WebSocket] = None
+        self.audio_processor: Optional[Callable[[bytes], None]] = None
+        
+    def bind_config(self, config: Config):
+        self.config=config 
+        
+    def start_recording(self, audio_processor: Callable[[bytes], None]) -> bool:
+        loop = ensure_event_loop()
+        return loop.run_until_complete(self.async_start_recording(audio_processor))
+        
+    async def async_start_recording(self, audio_processor: Callable[[bytes], None]) -> bool:
+        self.audio_processor = audio_processor
+        if self.client:
+            await self.client.send_json({"command": "start_recording"})
+            self.is_recording = True
+            return True
+        else:
+            return False
+        
+    def stop_recording(self) -> bool:
+        loop = ensure_event_loop()
+        return loop.run_until_complete(self.async_stop_recording())
+
+    async def async_stop_recording(self) -> bool:
+        if self.client:
+            await self.client.send_json({"command": "stop_recording"})
+            self.is_recording = False
+            return True
+        return False
+    
+    async def process_audio(self, audio_data: bytes):
+        if self.is_recording:
+            audio_np = np.frombuffer(audio_data, dtype=np.float32)
+            audio_bytes = (audio_np * 32767).astype(np.int16).tobytes()
+            if self.audio_processor:
+                self.audio_processor(audio_bytes)
+    
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.client = websocket
+        if self.config and self.config.debug:
+            print("Webview: Client has been connected to audio recorder")
+        try:
+            while True:
+                data = await websocket.receive_text()
+                audio_data = json.loads(data)
+                if audio_data['type'] == "audio_data":
+                    await self.process_audio(bytes(audio_data['data']))
+        finally:
+            self.client = None
+    
 
 
 html_updater = HTMLUpdater()
 audio_player = AudioPlayer()
+audio_recorder = AudioRecorder()

@@ -6,17 +6,22 @@ from webview.utils import read_and_encode_mp3
 async def async_updater():
     i=0
     while True:
-        await webview.async_update_view(f"<h2>This is update number {i}</h2>")
+        await webview.async_update_view(f"""<h2>
+            <button>click me</button>
+            This is update number {i}
+            </h2>""")
         await asyncio.sleep(1)
         i+=1
 
 def updater():
     i=0
     while True:
-        webview.update_view(f"<h2>This is update number {i}</h2>")
+        webview.update_view(f"""<h2>
+            <button>click me</button>
+            This is update number {i}
+        </h2>""")
         time.sleep(1)
         i+=1
-
 
 
 async def async_main():
@@ -32,7 +37,7 @@ async def async_main():
     audio_id = await webview.async_play_audio(audio_2, delay=3) 
     print("Audio with id", audio_id, "is playing")
     
-    await asyncio.gather(task)
+    # await asyncio.gather(task)
    
    
 
@@ -55,10 +60,10 @@ def main():
     
     
 if __name__=='__main__':  
-    webview.configure(log_level="critical")
+    webview.configure(log_level="critical", custom_browser=True)
     webview.start_webview() 
     
     main()
     
-    asyncio.run(async_main())
+    # asyncio.run(async_main())
     

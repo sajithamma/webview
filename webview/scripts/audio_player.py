@@ -12,7 +12,7 @@ class AudioPlayer {
     }
 
     onOpen(event) {
-        console.log('WebSocket connection opened');
+        console.log('WebSocket connection opened for audio player');
     }
 
     onMessage(event) {
@@ -27,11 +27,11 @@ class AudioPlayer {
     }
 
     onClose(event) {
-        console.log('WebSocket connection closed');
+        console.log('WebSocket connection closed for audio player');
     }
 
     onError(error) {
-        console.error('WebSocket error:', error);
+        console.error('Audio player websocket error:', error);
     }
 
     playNextAudio() {
@@ -75,7 +75,4 @@ class AudioPlayer {
         });
     }
 }
-
-
-const audioPlayer = new AudioPlayer('ws://[=[host]=]:[=[port]=]/[=[audio_player_endpoint]=]');
 """
