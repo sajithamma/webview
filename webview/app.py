@@ -54,15 +54,19 @@ async def root(request: Request):
     <body>
         <div id="main_update_content"></div>
         <script>
+
+            const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+            const host = window.location.hostname;
+
             [=[html_updater_script]=]   // has the class definition HtmlUpdater
             [=[audio_player_script]=]   // has the class definition AudioPlayer
             [=[audio_recorder_script]=] // has the class definition AudioRecorder
             
             // Initialize the AudioPlayer and AudioRecorder when the page loads
             window.onload = () => {
-                new HtmlUpdater(`ws://[=[host]=]:[=[port]=]/[=[html_updater_endpoint]=]`);
-                new AudioPlayer('ws://[=[host]=]:[=[port]=]/[=[audio_player_endpoint]=]');
-                new AudioRecorder("ws://[=[host]=]:[=[port]=]/[=[audio_recorder_endpoint]=]");
+                new HtmlUpdater(`${protocol}://${host}:[=[port]=]/[=[html_updater_endpoint]=]`);
+                new AudioPlayer(`${protocol}://${host}:[=[port]=]/[=[audio_player_endpoint]=]`);
+                new AudioRecorder(`${protocol}://${host}:[=[port]=]/[=[audio_recorder_endpoint]=]`);
             };
         </script>
     </body>
